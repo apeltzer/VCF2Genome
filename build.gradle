@@ -1,0 +1,45 @@
+group 'com.uni-tuebingen.de.it.eager.vcf2genome'
+version '0.84'
+
+
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.7.1'
+    }
+}
+
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+    apply plugin: 'java'
+    apply plugin: 'com.jfrog.bintray'
+}
+
+sourceCompatibility = 1.8
+
+
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+    }
+}
+
+
+jar {
+    manifest {
+        attributes("Implementation-Title": "VCF2Genome",
+                "Implementation-Version": version, "main-Class": "Main")
+    }
+    doFirst {
+        from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } }
+    }
+}
