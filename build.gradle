@@ -43,3 +43,35 @@ jar {
         from { configurations.runtime.collect { it.isDirectory() ? it : zipTree(it) } }
     }
 }
+
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            from components.java
+            groupId 'com.uni-tuebingen.de.it.eager'
+            artifactId 'VCF2Genome'
+        }
+    }
+}
+
+
+bintray {
+    user = bintrayUser
+    key = bintrayKey
+    publications = ['MyPublication']
+    publish = true
+    pkg {
+        repo = 'EAGER'
+        name = 'VCF2Genome'
+        licenses = ['GPL-3.0']
+        vcsUrl = "https://github.com/apeltzer/VCF2Genome"
+        version {
+            name = '0.84'
+            desc = 'A tool to create a draft genome file out of a GATK VCF file'
+            released  = new Date()
+            vcsTag = '0.84'
+            attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
+        }
+
+    }
+}
