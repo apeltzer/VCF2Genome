@@ -5,3 +5,5 @@ VERSIONREL=1
 #PKGBUILD
 sed -i "s/^pkgver=.*/pkgver=$VERSION/" PKGBUILD
 sed -i "s/^pkgrel=.*/pkgrel=$VERSIONREL/" PKGBUILD
+cp ../build/libs/VCF2Genome*.jar . 
+makepkg

@@ -3,14 +3,14 @@
 
 pkgname=vcf2genome
 pkgver=0.84
-pkgrel=4
+pkgrel=1
 pkgdesc="A tool to generate a genome out of a provided EMIT_ALL_SITES VCF file, filtering potential bad candidates."
-realname="VCF2Genome.jar"
+realname="VCF2Genome-${pkgver}.jar"
 arch=('any')
 url="http://it.inf.uni-tuebingen.de/?page_id=161"
 license=('custom')
 depends=('java-environment')
-source=("../build/libs/VCF2Genome-${pkgver}.jar" "vcf2genome.sh")
+source=("VCF2Genome-${pkgver}.jar" "vcf2genome.sh")
 noextract=("VCF2Genome-${pkgver}.jar")
 md5sums=('SKIP' 'SKIP')
 
