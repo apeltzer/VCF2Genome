@@ -3,5 +3,5 @@
 VERSION=$(grep -e '^version' ../build.gradle | tr -d "'" | tr -d "version ")
 VERSIONREL=1
 #PKGBUILD
-sed -i '' "s/^pkgver=.*/pkgver=$VERSION/" PKGBUILD
-sed -i '' "s/^pkgrel=.*/pkgrel=$VERSIONREL/" PKGBUILD
+sed -i "s/^pkgver=.*/pkgver=$VERSION/" PKGBUILD
+sed -i "s/^pkgrel=.*/pkgrel=$VERSIONREL/" PKGBUILD
