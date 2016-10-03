@@ -60,6 +60,7 @@ bintray {
     key = bintrayKey
     publications = ['MyPublication']
     publish = true
+    override = true
     pkg {
         repo = 'EAGER'
         name = 'VCF2Genome'
