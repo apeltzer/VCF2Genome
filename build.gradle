@@ -67,10 +67,10 @@ bintray {
         licenses = ['GPL-3.0']
         vcsUrl = "https://github.com/apeltzer/VCF2Genome"
         version {
-            name = '0.84'
+            name = project.version
             desc = 'A tool to create a draft genome file out of a GATK VCF file'
             released  = new Date()
-            vcsTag = '0.84'
+            vcsTag = project.version
             attributes = ['gradle-plugin': 'com.use.less:com.use.less.gradle:gradle-useless-plugin']
         }
 
