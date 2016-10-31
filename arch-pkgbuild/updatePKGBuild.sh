@@ -6,7 +6,7 @@ VERSIONREL=1
 sed -i "s/^pkgver=.*/pkgver=$VERSION/" PKGBUILD
 sed -i "s/^pkgrel=.*/pkgrel=$VERSIONREL/" PKGBUILD
 #startscript
-sed -i "s/VCF2Genome.*/VCF2Genome-$VERSION.jar $*/" vcf2genome.sh
+sed -i "s/VCF2Genome.*/VCF2Genome-$VERSION.jar \$\*/" vcf2genome.sh
 
 cp ../build/libs/VCF2Genome*.jar . 
 makepkg
