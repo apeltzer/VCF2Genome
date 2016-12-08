@@ -2,6 +2,7 @@
 A tool to create a draft genome file out of a GATK VCF file
 
 [![Build Status](https://lambda.informatik.uni-tuebingen.de/jenkins/buildStatus/icon?job=VCF2Genome)](https://lambda.informatik.uni-tuebingen.de/jenkins/view/EAGER/job/VCF2Genome/)
+[![codecov](https://codecov.io/gh/apeltzer/VCF2Genome/branch/master/graph/badge.svg)](https://codecov.io/gh/apeltzer/VCF2Genome)
 [ ![Download](https://api.bintray.com/packages/apeltzer/EAGER/VCF2Genome/images/download.svg) ](https://bintray.com/apeltzer/EAGER/VCF2Genome/_latestVersion)
 
 Author: Alexander Herbig <herbig@shh.mpg.de>
