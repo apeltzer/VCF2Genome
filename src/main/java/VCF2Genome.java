@@ -255,7 +255,7 @@ public class VCF2Genome {
 
                 //Get coverage of alternative allele
                 int index_call = variantContext.getAlleleIndex(call_allele);
-                cov = variantContext.getGenotype(0).getAD()[index_call];
+                int cov_call = variantContext.getGenotype(0).getAD()[index_call];
 
                 //Get coverage of reference allele
                 int index_ref = variantContext.getAlleleIndex(ref_allele);
@@ -263,15 +263,15 @@ public class VCF2Genome {
 
                 //Calculate SNPalellefrequency properly...
 
-                SNPallelFreq = Math.min((double) cov / (full_cov - 1), 1); // -1 because once doesn't count
+                SNPallelFreq = Math.min((double) cov_call / (full_cov - 1), 1); // -1 because once doesn't count
 
-                covCount += cov + cov_ref;
+                covCount += full_cov;
 
                 //Check homozygous case
 
                 //cols == line.split("\t"); --> split line, 3 = C (ref) , 4 = T (ALT)
 
-                if (qual >= minQual && cov >= minCov && SNPallelFreq >= minHomSNPallelFreq) {
+                if (qual >= minQual && cov_call >= minCov && SNPallelFreq >= minHomSNPallelFreq) {
 
                     varCallPos++;
 
@@ -279,7 +279,7 @@ public class VCF2Genome {
                     uncertainCalls[currPos1based - 1] = call_allele.getDisplayString().charAt(0);
 
                     snpPositions.add(currPos1based);
-                } else if (qual >= minQual && cov >= minCov && SNPallelFreq >= minHetSNPallelFreq) {
+                } else if (qual >= minQual && cov_call >= minCov && SNPallelFreq >= minHetSNPallelFreq) {
 
                     varCallPos++;
 
@@ -289,11 +289,10 @@ public class VCF2Genome {
                     snpPositions.add(currPos1based);
 
                 } else {
-                    cov = cov_ref;
 
-                    SNPallelFreq = (double) cov / (full_cov - 1); // -1 because once doesn't count
+                    SNPallelFreq = (double) cov_ref / (full_cov - 1); // -1 because once doesn't count
 
-                    if (qual >= minQual && cov >= minCov) {
+                    if (qual >= minQual && cov_ref >= minCov) {
                         if (SNPallelFreq >= minHomSNPallelFreq) {
                             refCallPos++;
                         } else {
@@ -312,101 +311,102 @@ public class VCF2Genome {
                         uncertainCalls[currPos1based - 1] = Character.toLowerCase(call_allele.getDisplayString().charAt(0));
                         missingDataPos[currPos1based - 1] = true;
                     }
-                }}else {
+                }
+            } else {
                 unknownCall++;
 
                 calls[currPos1based - 1] = nChar;
                 uncertainCalls[currPos1based - 1] = nChar;
                 missingDataPos[currPos1based - 1] = true;
+            }
         }
-    }
 
 
-    //write stats
-    ns =discardedRefCall +discardedVarCall +noCallPos +unknownCall +nonStandardRefChars;
-    nperc =Math.round(((ns *100d)/allPos)*100)/100d;
-    covround =Math.round((covCount /(double)allPos)*100)/100d;
+        //write stats
+        ns = discardedRefCall + discardedVarCall + noCallPos + unknownCall + nonStandardRefChars;
+        nperc = Math.round(((ns * 100d) / allPos) * 100) / 100d;
+        covround = Math.round((covCount / (double) allPos) * 100) / 100d;
 
         System.out.println(
 
-    getSampleNameFromPath(inFile) +"\t"+varCallPos +"\t"+covround +"\t"+(100-nperc)+"\t"+refCallPos +"\t"+allPos +"\t"+noCallPos +"\t"+discardedRefCall +"\t"+discardedVarCall +"\t"+filteredVarCall +"\t"+unknownCall);
+                getSampleNameFromPath(inFile) + "\t" + varCallPos + "\t" + covround + "\t" + (100 - nperc) + "\t" + refCallPos + "\t" + allPos + "\t" + noCallPos + "\t" + discardedRefCall + "\t" + discardedVarCall + "\t" + filteredVarCall + "\t" + unknownCall);
 
 
-    //////////////////////
-    //END -- Parse VCFs //
-    //////////////////////
+        //////////////////////
+        //END -- Parse VCFs //
+        //////////////////////
 
 
-    //Write draftN
-    BufferedWriter bw = new BufferedWriter(new FileWriter(outFileDraft));
+        //Write draftN
+        BufferedWriter bw = new BufferedWriter(new FileWriter(outFileDraft));
 
 
-    StringBuffer tmpSeq;
+        StringBuffer tmpSeq;
 
-    tmpSeq =new
+        tmpSeq = new
 
-    StringBuffer();
-        for(
-    int pos = 1;
-    pos <=calls.length;pos++)
-            tmpSeq.append(calls[pos -1]);
+                StringBuffer();
+        for (
+                int pos = 1;
+                pos <= calls.length; pos++)
+            tmpSeq.append(calls[pos - 1]);
 
-        FASTAWriter.write(bw,draftName +"_draftN",tmpSeq.toString());
-
-
-        bw.close();
-
-    //Write draftUncertain
-    bw =new
-
-    BufferedWriter(new FileWriter(outFileNR1234));
-
-
-    tmpSeq =new
-
-    StringBuffer();
-
-        for(
-    int pos = 1;
-    pos <=calls.length;pos++)
-            tmpSeq.append(uncertainCalls[pos -1]);
-
-        FASTAWriter.write(bw,draftName +"_draftUncertain",tmpSeq.toString());
+        FASTAWriter.write(bw, draftName + "_draftN", tmpSeq.toString());
 
 
         bw.close();
 
-    //Write draftRefMod
-    bw =new
+        //Write draftUncertain
+        bw = new
 
-    BufferedWriter(new FileWriter(outFileRefMod));
-
-
-    tmpSeq =new
-
-    StringBuffer();
-
-    char tmpchar;
+                BufferedWriter(new FileWriter(outFileNR1234));
 
 
-        for(
-    int pos = 1;
-    pos <=calls.length;pos++)
+        tmpSeq = new
 
-    {
-        tmpchar = calls[pos - 1];
-        if (tmpchar == nChar)
-            tmpSeq.append(refGenome.charAt(pos - 1));
-        else
-            tmpSeq.append(tmpchar);
+                StringBuffer();
+
+        for (
+                int pos = 1;
+                pos <= calls.length; pos++)
+            tmpSeq.append(uncertainCalls[pos - 1]);
+
+        FASTAWriter.write(bw, draftName + "_draftUncertain", tmpSeq.toString());
+
+
+        bw.close();
+
+        //Write draftRefMod
+        bw = new
+
+                BufferedWriter(new FileWriter(outFileRefMod));
+
+
+        tmpSeq = new
+
+                StringBuffer();
+
+        char tmpchar;
+
+
+        for (
+                int pos = 1;
+                pos <= calls.length; pos++)
+
+        {
+            tmpchar = calls[pos - 1];
+            if (tmpchar == nChar)
+                tmpSeq.append(refGenome.charAt(pos - 1));
+            else
+                tmpSeq.append(tmpchar);
+        }
+
+        FASTAWriter.write(bw, draftName + "_draftRefMod", tmpSeq.toString());
+
+
+        bw.close();
+
     }
-
-        FASTAWriter.write(bw,draftName +"_draftRefMod",tmpSeq.toString());
-
-
-        bw.close();
-
-}
 
     private static void printUsage() {
         System.out.println("USAGE: java -jar VCF2Genome.jar <in.vcf> <reference-genome.fasta> <draft.fasta> <refMod.fasta> <uncertain.fasta> <minimum quality score> <minimum coverage> <minimum SNP allel frequency> [draft sequence name]");
