@@ -187,13 +187,11 @@ public class VCF2Genome {
             boolean isRefCall = false;
             boolean isVarCall = false;
             boolean isVarHomCall = false;
-            if(currPos1based == 135060){
-                System.out.println("Stop here, debug!");
-            }
 
             // HET HOM_REF HOM_VAR MIXED NO_CALL UNAVAILABLE
 
             for (Genotype g : variantContext.getGenotypes()) {
+                variantContext.getAttribute("AD");
                 GenotypeType gtt = g.getType();
                 if (gtt == GenotypeType.NO_CALL) { //TODO check with test cases here!!!
                     isNoCall = true;
@@ -246,7 +244,7 @@ public class VCF2Genome {
 
             //VariantCall
 
-            if (isVarCall) {
+            if (isVarCall | isVarHomCall) {
                 qual = variantContext.getPhredScaledQual();
                 //ned to get the second allele here, non ref
                 Allele ref_allele = variantContext.getReference();
@@ -265,7 +263,7 @@ public class VCF2Genome {
 
                 //Calculate SNPalellefrequency properly...
 
-                SNPallelFreq = Math.min((double) cov / (cov + cov_ref - 1), 1); // -1 because once doesn't count
+                SNPallelFreq = Math.min((double) cov / (full_cov - 1), 1); // -1 because once doesn't count
 
                 covCount += cov + cov_ref;
 
@@ -307,17 +305,14 @@ public class VCF2Genome {
                             missingDataPos[currPos1based - 1] = true;
                         }
                         // do nothing since reference is called
+                    } else {
+                        discardedVarCall++;
+                        call_allele = variantContext.getAlternateAlleles().get(0);
+                        calls[currPos1based - 1] = nChar;
+                        uncertainCalls[currPos1based - 1] = Character.toLowerCase(call_allele.getDisplayString().charAt(0));
+                        missingDataPos[currPos1based - 1] = true;
                     }
-                }
-
-
-            } else if (isVarHomCall){
-                discardedVarCall++;
-            Allele call_allele = variantContext.getAlternateAlleles().get(0);
-            calls[currPos1based - 1] = nChar;
-            uncertainCalls[currPos1based - 1] = Character.toLowerCase(call_allele.getDisplayString().charAt(0));
-            missingDataPos[currPos1based - 1] = true;
-            } else {
+                }}else {
                 unknownCall++;
 
                 calls[currPos1based - 1] = nChar;
