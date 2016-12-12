@@ -32,10 +32,21 @@ import java.util.Set;
 
 public class VCF2Genome {
 
+
+    /**
+     * Main method, used for calling class method
+     * @param args
+     * @throws Exception
+     */
+    public static void main(String[] args) throws Exception {
+        VCF2Genome vcf2genome = new VCF2Genome(args);
+    }
+
+
     /**
      * @author Alexander Herbig
      */
-    public static void main(String[] args) throws Exception {
+    public VCF2Genome(String[] args) throws Exception {
         String inFile;
         String refFile;
         String outFileDraft;
