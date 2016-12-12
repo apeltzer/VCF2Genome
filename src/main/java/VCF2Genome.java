@@ -198,6 +198,7 @@ public class VCF2Genome {
             boolean isRefCall = false;
             boolean isVarCall = false;
             boolean isVarHomCall = false;
+            boolean isUnhandledCall = false;
 
             // HET HOM_REF HOM_VAR MIXED NO_CALL UNAVAILABLE
 
@@ -216,12 +217,15 @@ public class VCF2Genome {
                 if (gtt == GenotypeType.HOM_VAR) {
                     isVarHomCall = true; //TODO check with 1/1 string for example!!!
                 }
+                if(variantContext.getAlleles().size() > 2){
+                    isUnhandledCall = true;
+                }
             }
 
 
             //No call
 
-            if (isNoCall) {
+            if (isNoCall & !isUnhandledCall) {
                 noCallPos++;
 
                 calls[currPos1based - 1] = nChar;
@@ -233,7 +237,7 @@ public class VCF2Genome {
 
             //Ref Call
 
-            else if (isRefCall) {
+            else if (isRefCall & !isUnhandledCall) {
                 qual = variantContext.getPhredScaledQual();
                 cov = Integer.parseInt((String) variantContext.getAttribute("DP"));
                 Allele ref_allele = variantContext.getReference();
@@ -257,8 +261,8 @@ public class VCF2Genome {
 
 
             //VariantCall
-
-            else if (isVarCall | isVarHomCall) {
+            //TODO what to do with something like 1/2 - cant handle this with this kind of code right now!
+            else if ((isVarCall | isVarHomCall) & !isUnhandledCall)  {
                 qual = variantContext.getPhredScaledQual();
                 //ned to get the second allele here, non ref
                 Allele ref_allele = variantContext.getReference();
