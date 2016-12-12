@@ -222,9 +222,12 @@ public class VCF2Genome {
 
             //Ref Call
 
-            if (isRefCall) {
+            else if (isRefCall) {
                 qual = variantContext.getPhredScaledQual();
                 cov = Integer.parseInt((String) variantContext.getAttribute("DP"));
+                Allele ref_allele = variantContext.getReference();
+
+
                 covCount += cov;
 
                 if (qual >= minQual && cov >= minCov) {
@@ -244,13 +247,12 @@ public class VCF2Genome {
 
             //VariantCall
 
-            if (isVarCall | isVarHomCall) {
+            else if (isVarCall | isVarHomCall) {
                 qual = variantContext.getPhredScaledQual();
                 //ned to get the second allele here, non ref
                 Allele ref_allele = variantContext.getReference();
                 Allele call_allele = variantContext.getAlternateAlleles().get(0);
 
-                int full_cov = Integer.parseInt((String) variantContext.getAttribute("DP"));
 
 
                 //Get coverage of alternative allele
@@ -260,6 +262,10 @@ public class VCF2Genome {
                 //Get coverage of reference allele
                 int index_ref = variantContext.getAlleleIndex(ref_allele);
                 int cov_ref = variantContext.getGenotype(0).getAD()[index_ref];
+
+               // int full_cov = Integer.parseInt((String) variantContext.getAttribute("DP"));
+
+                int full_cov = cov_call + cov_ref;
 
                 //Calculate SNPalellefrequency properly...
 
@@ -454,6 +460,12 @@ public class VCF2Genome {
 
         return 'N';
     }
+
+    /**
+     * This gets the sample name without the extension from the path.
+     * @param sampleNameWithPath
+     * @return
+     */
 
     public static String getSampleNameFromPath(String sampleNameWithPath) {
         return Files.getNameWithoutExtension(sampleNameWithPath);
