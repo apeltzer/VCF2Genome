@@ -21,10 +21,7 @@ import htsjdk.variant.variantcontext.GenotypeType;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
+import java.io.*;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -172,12 +169,12 @@ public class VCF2Genome {
 
             lastPos1based = currPos1based;
 
-            currPos1based = variantContext.getStart(); //TODO check if this does the right thing, it should however...
+            currPos1based = variantContext.getStart();
 
             //Introduce Ns for non-covered sites
             if (currPos1based - lastPos1based != 1) {
                 if (lastPos1based >= currPos1based) {
-                    throw new Error("Error: Base ccalls in the vcf file are not sorted! (Note that we currently don't support multiple chromosomes, too!");
+                    throw new IOException("Error: Base calls in the vcf file are not sorted! (Note that we currently don't support multiple chromosomes, too!");
                 }
 
                 for (int i = lastPos1based + 1; i < currPos1based; i++) {

@@ -53,7 +53,10 @@ public class VCF2GenomeTest {
         assertTrue(draft_equal);
         assertTrue(refmod_equal);
         assertTrue(uncertain_equal);
+    }
 
-
+    @Test(expected = IOException.class)
+    public void testVCF2GenomeFailMessage() throws Exception{
+        VCF2Genome vcf2Genome = new VCF2Genome(new String[]{"build/classes/test/VCF2Genome_Test_SubsetFailSortOrder.vcf", "build/classes/test/NC_021490.2.fasta", "build/classes/test/draft_fail.fasta", "build/classes/test/refMod_fail.fasta", "build/classes/test/uncertain_fail.fasta", "30", "5", "0.9", "test"});
     }
 }
