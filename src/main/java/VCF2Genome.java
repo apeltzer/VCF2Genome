@@ -56,7 +56,7 @@ public class VCF2Genome {
 
 
         String programName = "VCF2Genome";
-        String author = "Alexander Herbig, improvements by Alexander Peltzer";
+        String author = "Alexander Herbig and Alexander Peltzer";
         String authorsEmail = "herbig@shh.mpg.de, peltzer@shh.mpg.de";
         String version = "0.9 (2016-12-08)";
 
