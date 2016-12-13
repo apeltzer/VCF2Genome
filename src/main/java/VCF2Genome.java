@@ -217,7 +217,7 @@ public class VCF2Genome {
                 if (gtt == GenotypeType.HOM_VAR) {
                     isVarHomCall = true; //TODO check with 1/1 string for example!!!
                 }
-                if(variantContext.getAlleles().size() > 2){
+                if(variantContext.getAlleles().size() > 2){ //We currently handle haploid calls only!
                     isUnhandledCall = true;
                 }
             }
@@ -239,9 +239,10 @@ public class VCF2Genome {
 
             else if (isRefCall & !isUnhandledCall) {
                 qual = variantContext.getPhredScaledQual();
-                cov = Integer.parseInt((String) variantContext.getAttribute("DP"));
-                Allele ref_allele = variantContext.getReference();
 
+                Genotype g = variantContext.getGenotype(0);
+                cov = g.getDP();
+                //cov = Integer.parseInt((String) variantContext.getAttribute("DP")); //This can be wrong!! (109 vs 4!)
 
                 covCount += cov;
 
@@ -278,8 +279,6 @@ public class VCF2Genome {
                 int index_ref = variantContext.getAlleleIndex(ref_allele);
                 int cov_ref = variantContext.getGenotype(0).getAD()[index_ref];
 
-               // int full_cov = Integer.parseInt((String) variantContext.getAttribute("DP"));
-
                 int full_cov = cov_call + cov_ref;
 
                 //Calculate SNPalellefrequency properly...
@@ -289,8 +288,6 @@ public class VCF2Genome {
                 covCount += full_cov;
 
                 //Check homozygous case
-
-                //cols == line.split("\t"); --> split line, 3 = C (ref) , 4 = T (ALT)
 
                 if (qual >= minQual && cov_call >= minCov && SNPallelFreq >= minHomSNPallelFreq) {
 
