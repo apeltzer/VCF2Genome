@@ -1,5 +1,5 @@
 group 'com.uni-tuebingen.de.it.eager.vcf2genome'
-version '0.84'
+version '0.90'
 
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
