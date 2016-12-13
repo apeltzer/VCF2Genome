@@ -102,6 +102,7 @@ public class VCF2GenomeTest {
         char c3 = 'T';
         char c4 = 'C';
 
+        assertEquals(c1, VCF2Genome.getAmbiguousBase(c1,c1));
         assertEquals('R', VCF2Genome.getAmbiguousBase(c1,c2));
         assertEquals('Y', VCF2Genome.getAmbiguousBase(c3,c4));
         assertEquals('K', VCF2Genome.getAmbiguousBase(c1,c3));
