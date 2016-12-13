@@ -94,4 +94,20 @@ public class VCF2GenomeTest {
                 "\n" +
                 "In case of any questions contact Alexander Herbig and Alexander Peltzer (herbig@shh.mpg.de, peltzer@shh.mpg.de).\n" , outContent.toString());
     }
+
+    @Test
+    public void testAmbigousBases(){
+        char c1 = 'G';
+        char c2 = 'A';
+        char c3 = 'T';
+        char c4 = 'C';
+
+        assertEquals('R', VCF2Genome.getAmbiguousBase(c1,c2));
+        assertEquals('Y', VCF2Genome.getAmbiguousBase(c3,c4));
+        assertEquals('K', VCF2Genome.getAmbiguousBase(c1,c3));
+        assertEquals('M', VCF2Genome.getAmbiguousBase(c2,c4));
+        assertEquals('S', VCF2Genome.getAmbiguousBase(c1,c4));
+        assertEquals('W', VCF2Genome.getAmbiguousBase(c2,c3));
+        assertEquals('N', VCF2Genome.getAmbiguousBase('U', c1)); //One example!
+    }
 }
