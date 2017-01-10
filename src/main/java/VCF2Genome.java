@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016. VCF2Genome Alexander Herbig
+ * Copyright (c) 2016. VCF2Genome Alexander Herbig, Alexander Peltzer
  * This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -339,9 +339,7 @@ public class VCF2Genome {
         nperc = Math.round(((ns * 100d) / allPos) * 100) / 100d;
         covround = Math.round((covCount / (double) allPos) * 100) / 100d;
 
-        System.out.println(
-
-                getSampleNameFromPath(inFile) + "\t" + varCallPos + "\t" + covround + "\t" + (100 - nperc) + "\t" + refCallPos + "\t" + allPos + "\t" + noCallPos + "\t" + discardedRefCall + "\t" + discardedVarCall + "\t" + filteredVarCall + "\t" + unknownCall);
+        System.out.println(getSampleNameFromPath(inFile) + "\t" + varCallPos + "\t" + covround + "\t" + (100 - nperc) + "\t" + refCallPos + "\t" + allPos + "\t" + noCallPos + "\t" + discardedRefCall + "\t" + discardedVarCall + "\t" + filteredVarCall + "\t" + unknownCall);
 
 
         //////////////////////
@@ -350,8 +348,6 @@ public class VCF2Genome {
 
 
         //Write draftN
-        BufferedWriter bw = new BufferedWriter(new FileWriter(outFileDraft));
-
 
         StringBuffer tmpSeq;
 
@@ -361,30 +357,21 @@ public class VCF2Genome {
             tmpSeq.append(calls[pos - 1]);
         }
 
-        FASTAWriter fw = new FASTAWriter(bw, draftName + "_draftN", tmpSeq.toString());
+        FASTAWriter fw = new FASTAWriter(outFileDraft, draftName + "_draftN", tmpSeq.toString());
 
 
-        bw.close();
 
         //Write draftUncertain
-        bw = new BufferedWriter(new FileWriter(outFileNR1234));
-
-
         tmpSeq = new StringBuffer();
 
         for (int pos = 1; pos <= calls.length; pos++) {
             tmpSeq.append(uncertainCalls[pos - 1]);
         }
 
-        fw = new FASTAWriter(bw, draftName + "_draftUncertain", tmpSeq.toString());
+        fw = new FASTAWriter(outFileNR1234, draftName + "_draftUncertain", tmpSeq.toString());
 
-
-        bw.close();
 
         //Write draftRefMod
-        bw = new BufferedWriter(new FileWriter(outFileRefMod));
-
-
         tmpSeq = new StringBuffer();
 
         char tmpchar;
@@ -399,8 +386,7 @@ public class VCF2Genome {
             }
         }
 
-        fw = new FASTAWriter(bw, draftName + "_draftRefMod", tmpSeq.toString());
-        bw.close();
+        fw = new FASTAWriter(outFileRefMod, draftName + "_draftRefMod", tmpSeq.toString());
 
     }
 

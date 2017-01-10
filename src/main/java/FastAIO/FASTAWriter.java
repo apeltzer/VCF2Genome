@@ -1,6 +1,6 @@
 package FastAIO;
 /*
- * Copyright (c) 2016. VCF2Genome Alexander Herbig
+ * Copyright (c) 2016. VCF2Genome Alexander Herbig, Alexander Peltzer
  * This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation, either version 3 of the License, or
@@ -16,6 +16,8 @@ package FastAIO;
  */
 
 import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -37,13 +39,19 @@ public class FASTAWriter {
     private String genomeID;
     private String sequence;
 
-    public FASTAWriter(BufferedWriter bw, String genomeID, String sequence) throws Exception{
-        this.bfw = bw;
+    public FASTAWriter(String filePath, String genomeID, String sequence) throws Exception{
+        this.bfw = new BufferedWriter(new FileWriter(new File(filePath)));
         this.genomeID = genomeID;
         this.sequence = sequence;
         writeFastAFile();
     }
 
+
+    /**
+     * Method that writes FastA entries into a file..
+     *
+     * @throws IOException
+     */
     private void writeFastAFile() throws IOException {
         int charsInLine;
         String tmpSeqString;
@@ -67,5 +75,6 @@ public class FASTAWriter {
         }
 
         bfw.flush();
+        bfw.close();
     }
 }
