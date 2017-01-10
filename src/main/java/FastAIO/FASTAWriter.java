@@ -16,6 +16,7 @@ package FastAIO;
  */
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 
 /**
  * Writes a list of sequences to a file in FASTA format.
@@ -31,28 +32,40 @@ public class FASTAWriter {
      *                     which are written to the FASTA file
      * @throws Exception
      */
-    public static void write(BufferedWriter bw, String genomeID, String sequence) throws Exception {
+
+    private BufferedWriter bfw;
+    private String genomeID;
+    private String sequence;
+
+    public FASTAWriter(BufferedWriter bw, String genomeID, String sequence) throws Exception{
+        this.bfw = bw;
+        this.genomeID = genomeID;
+        this.sequence = sequence;
+        writeFastAFile();
+    }
+
+    private void writeFastAFile() throws IOException {
         int charsInLine;
         String tmpSeqString;
 
         tmpSeqString = sequence;
-        bw.write(">" + genomeID);
-        bw.newLine();
+        bfw.write(">" + genomeID);
+        bfw.newLine();
 
         charsInLine = 0;
         for (int i = 0; i < tmpSeqString.length(); i++) {
-            bw.write(tmpSeqString.charAt(i));
+            bfw.write(tmpSeqString.charAt(i));
             charsInLine++;
 
             if (charsInLine == 60) {
-                bw.newLine();
+                bfw.newLine();
                 charsInLine = 0;
             }
         }
         if (charsInLine != 0) {
-            bw.newLine();
+            bfw.newLine();
         }
 
-        bw.flush();
+        bfw.flush();
     }
 }

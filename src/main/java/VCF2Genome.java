@@ -135,13 +135,9 @@ public class VCF2Genome {
         double nperc;
         double covround;
 
-        String line;
-        String[] cols;
-
         double qual;
         int cov;
         double SNPallelFreq;
-        String allelCols;
 
         int lastPos1based = 0;
         int currPos1based = 0;
@@ -359,67 +355,51 @@ public class VCF2Genome {
 
         StringBuffer tmpSeq;
 
-        tmpSeq = new
+        tmpSeq = new StringBuffer();
 
-                StringBuffer();
-        for (
-                int pos = 1;
-                pos <= calls.length; pos++)
+        for (int pos = 1; pos <= calls.length; pos++) {
             tmpSeq.append(calls[pos - 1]);
+        }
 
-        FASTAWriter.write(bw, draftName + "_draftN", tmpSeq.toString());
+        FASTAWriter fw = new FASTAWriter(bw, draftName + "_draftN", tmpSeq.toString());
 
 
         bw.close();
 
         //Write draftUncertain
-        bw = new
-
-                BufferedWriter(new FileWriter(outFileNR1234));
+        bw = new BufferedWriter(new FileWriter(outFileNR1234));
 
 
-        tmpSeq = new
+        tmpSeq = new StringBuffer();
 
-                StringBuffer();
-
-        for (
-                int pos = 1;
-                pos <= calls.length; pos++)
+        for (int pos = 1; pos <= calls.length; pos++) {
             tmpSeq.append(uncertainCalls[pos - 1]);
+        }
 
-        FASTAWriter.write(bw, draftName + "_draftUncertain", tmpSeq.toString());
+        fw = new FASTAWriter(bw, draftName + "_draftUncertain", tmpSeq.toString());
 
 
         bw.close();
 
         //Write draftRefMod
-        bw = new
-
-                BufferedWriter(new FileWriter(outFileRefMod));
+        bw = new BufferedWriter(new FileWriter(outFileRefMod));
 
 
-        tmpSeq = new
-
-                StringBuffer();
+        tmpSeq = new StringBuffer();
 
         char tmpchar;
 
 
-        for (
-                int pos = 1;
-                pos <= calls.length; pos++)
-
-        {
+        for (int pos = 1; pos <= calls.length; pos++){
             tmpchar = calls[pos - 1];
-            if (tmpchar == nChar)
+            if (tmpchar == nChar) {
                 tmpSeq.append(refGenome.charAt(pos - 1));
-            else
+            } else {
                 tmpSeq.append(tmpchar);
+            }
         }
 
-        FASTAWriter.write(bw, draftName + "_draftRefMod", tmpSeq.toString());
-
-
+        fw = new FASTAWriter(bw, draftName + "_draftRefMod", tmpSeq.toString());
         bw.close();
 
     }
