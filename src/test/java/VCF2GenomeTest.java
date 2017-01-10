@@ -69,7 +69,7 @@ public class VCF2GenomeTest {
     @Test
     public void testHelpAndStuff() throws Exception {
         VCF2Genome vcf2Genome = new VCF2Genome(new String[]{"-h"});
-        assertEquals("VCF2Genome - 0.9 (2016-12-08)\n" +
+        assertEquals("VCF2Genome - 0.9.1 (2017-01-09)\n" +
                 "by Alexander Herbig and Alexander Peltzer\n" +
                 "\n" +
                 "--- How to use VCF2Genome ---\n" +

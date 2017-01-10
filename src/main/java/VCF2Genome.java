@@ -14,6 +14,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import FastAIO.FASTAParser;
+import FastAIO.FASTAWriter;
 import com.google.common.io.Files;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.Genotype;
@@ -58,7 +60,7 @@ public class VCF2Genome {
         String programName = "VCF2Genome";
         String author = "Alexander Herbig and Alexander Peltzer";
         String authorsEmail = "herbig@shh.mpg.de, peltzer@shh.mpg.de";
-        String version = "0.9 (2016-12-08)";
+        String version = "0.9.1 (2017-01-09)";
 
         System.out.println(programName + " - " + version + "\nby " + author + "\n");
 
@@ -80,9 +82,9 @@ public class VCF2Genome {
         minCov = Integer.parseInt(args[6]);
         minSNPalleleFreq = Double.parseDouble(args[7]);
 
-        if (args.length >= 9)
+        if (args.length >= 9) {
             draftName = args[8];
-
+        }
 
         double minHomSNPallelFreq = minSNPalleleFreq;
         double minHetSNPallelFreq = minSNPalleleFreq;
@@ -90,7 +92,7 @@ public class VCF2Genome {
 
         String refGenome = FASTAParser.parseDNA(refFile).values().iterator().next();
 
-
+        //TODO this is bad.... -> not possible once we have indels (!)
         //SNP array
         char[] calls = new char[refGenome.length()];
         char[] uncertainCalls = new char[refGenome.length()];
@@ -184,7 +186,6 @@ public class VCF2Genome {
                     calls[currPos1based - 1] = nChar;
                     uncertainCalls[currPos1based - 1] = nChar;
                     missingDataPos[currPos1based - 1] = true;
-
                 }
             }
 
