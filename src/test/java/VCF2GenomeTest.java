@@ -96,19 +96,30 @@ public class VCF2GenomeTest {
     }
 
     @Test
-    public void testAmbigousBases(){
+    public void testAmbigousBases() throws Exception {
         char c1 = 'G';
         char c2 = 'A';
         char c3 = 'T';
         char c4 = 'C';
 
-        assertEquals(c1, VCF2Genome.getAmbiguousBase(c1,c1));
-        assertEquals('R', VCF2Genome.getAmbiguousBase(c1,c2));
-        assertEquals('Y', VCF2Genome.getAmbiguousBase(c3,c4));
-        assertEquals('K', VCF2Genome.getAmbiguousBase(c1,c3));
-        assertEquals('M', VCF2Genome.getAmbiguousBase(c2,c4));
-        assertEquals('S', VCF2Genome.getAmbiguousBase(c1,c4));
-        assertEquals('W', VCF2Genome.getAmbiguousBase(c2,c3));
-        assertEquals('N', VCF2Genome.getAmbiguousBase('U', c1)); //One example!
+
+
+        //Now compare output
+
+        File draft = new File("build/classes/test/draft.fasta");
+        File refmod = new File("build/classes/test/refMod.fasta");
+        File uncertain = new File("build/classes/main/uncertain.fasta");
+
+        VCF2Genome vcf2Genome = new VCF2Genome(new String[]{"build/classes/test/VCF2Genome_Test_Subset.vcf", "build/classes/test/NC_021490.2.fasta", "build/classes/test/draft.fasta", "build/classes/test/refMod.fasta", "build/classes/test/uncertain.fasta", "30", "5", "0.9", "test"});
+
+
+        assertEquals(c1, vcf2Genome.getAmbiguousBase(c1,c1));
+        assertEquals('R', vcf2Genome.getAmbiguousBase(c1,c2));
+        assertEquals('Y', vcf2Genome.getAmbiguousBase(c3,c4));
+        assertEquals('K', vcf2Genome.getAmbiguousBase(c1,c3));
+        assertEquals('M', vcf2Genome.getAmbiguousBase(c2,c4));
+        assertEquals('S', vcf2Genome.getAmbiguousBase(c1,c4));
+        assertEquals('W', vcf2Genome.getAmbiguousBase(c2,c3));
+        assertEquals('N', vcf2Genome.getAmbiguousBase('U', c1)); //One example!
     }
 }

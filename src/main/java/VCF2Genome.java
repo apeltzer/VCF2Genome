@@ -411,7 +411,7 @@ public class VCF2Genome {
     }
 
 
-    public static char getAmbiguousBase(char c1, char c2) {
+    public char getAmbiguousBase(char c1, char c2) {
         Set<Character> chars = new HashSet<Character>();
         chars.add(c1);
         chars.add(c2);
