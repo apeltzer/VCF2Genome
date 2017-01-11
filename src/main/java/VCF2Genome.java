@@ -94,18 +94,18 @@ public class VCF2Genome {
 
         //TODO this is bad.... -> not possible once we have indels (!)
         //SNP array
-        char[] calls = new char[refGenome.length()];
-        char[] uncertainCalls = new char[refGenome.length()];
+        String[] calls = new String[refGenome.length()];
+        String[] uncertainCalls = new String[refGenome.length()];
 
         Set<Integer> snpPositions = new HashSet<Integer>();
 
-        boolean[] missingDataPos = new boolean[refGenome.length()];
+        String[] missingDataPos = new String[refGenome.length()]; //TODO this is required
 
 
         //Fill SNP array
         for (int i = 0; i < calls.length; i++) {
-            calls[i] = refGenome.charAt(i);
-            uncertainCalls[i] = refGenome.charAt(i);
+            calls[i] = String.valueOf(refGenome.charAt(i));
+            uncertainCalls[i] = String.valueOf(refGenome.charAt(i));
         }
 
 
@@ -179,9 +179,9 @@ public class VCF2Genome {
                     allPos++;
                     nonStandardRefChars++;
 
-                    calls[currPos1based - 1] = nChar;
-                    uncertainCalls[currPos1based - 1] = nChar;
-                    missingDataPos[currPos1based - 1] = true;
+                    calls[currPos1based - 1] = String.valueOf(nChar);
+                    uncertainCalls[currPos1based - 1] = String.valueOf(nChar);
+                    missingDataPos[currPos1based - 1] = "t";
                 }
             }
 
@@ -222,9 +222,9 @@ public class VCF2Genome {
             if (isNoCall & !isUnhandledCall) {
                 noCallPos++;
 
-                calls[currPos1based - 1] = nChar;
-                uncertainCalls[currPos1based - 1] = nChar;
-                missingDataPos[currPos1based - 1] = true;
+                calls[currPos1based - 1] = String.valueOf(nChar);
+                uncertainCalls[currPos1based - 1] = String.valueOf(rChar);
+                missingDataPos[currPos1based - 1] = "t";
 
             }
 
@@ -247,9 +247,9 @@ public class VCF2Genome {
                 } else {
                     discardedRefCall++;
 
-                    calls[currPos1based - 1] = nChar;
-                    uncertainCalls[currPos1based - 1] = rChar;
-                    missingDataPos[currPos1based - 1] = true;
+                    calls[currPos1based - 1] = String.valueOf(nChar);
+                    uncertainCalls[currPos1based - 1] = String.valueOf(rChar);
+                    missingDataPos[currPos1based - 1] = "t";
 
                 }
             }
@@ -287,16 +287,16 @@ public class VCF2Genome {
 
                     varCallPos++;
 
-                    calls[currPos1based - 1] = call_allele.getDisplayString().charAt(0);
-                    uncertainCalls[currPos1based - 1] = call_allele.getDisplayString().charAt(0);
+                    calls[currPos1based - 1] = String.valueOf(call_allele.getDisplayString().charAt(0));
+                    uncertainCalls[currPos1based - 1] = String.valueOf(call_allele.getDisplayString().charAt(0));
 
                     snpPositions.add(currPos1based);
                 } else if (qual >= minQual && cov_call >= minCov && SNPallelFreq >= minHetSNPallelFreq) {
 
                     varCallPos++;
 
-                    calls[currPos1based - 1] = getAmbiguousBase(calls[currPos1based - 1], call_allele.getDisplayString().charAt(0));
-                    uncertainCalls[currPos1based - 1] = getAmbiguousBase(calls[currPos1based - 1], call_allele.getDisplayString().charAt(0));
+                    calls[currPos1based - 1] = String.valueOf(getAmbiguousBase(calls[currPos1based - 1].charAt(0), call_allele.getDisplayString().charAt(0)));
+                    uncertainCalls[currPos1based - 1] = String.valueOf(getAmbiguousBase(calls[currPos1based - 1].charAt(0), call_allele.getDisplayString().charAt(0)));
 
                     snpPositions.add(currPos1based);
 
@@ -310,26 +310,26 @@ public class VCF2Genome {
                         } else {
                             discardedVarCall++;
 
-                            calls[currPos1based - 1] = nChar;
-                            uncertainCalls[currPos1based - 1] = nChar;
+                            calls[currPos1based - 1] = String.valueOf(nChar);
+                            uncertainCalls[currPos1based - 1] = String.valueOf(nChar);
 
-                            missingDataPos[currPos1based - 1] = true;
+                            missingDataPos[currPos1based - 1] = "t";
                         }
                         // do nothing since reference is called
                     } else {
                         discardedVarCall++;
                         call_allele = variantContext.getAlternateAlleles().get(0);
-                        calls[currPos1based - 1] = nChar;
-                        uncertainCalls[currPos1based - 1] = Character.toLowerCase(call_allele.getDisplayString().charAt(0));
-                        missingDataPos[currPos1based - 1] = true;
+                        calls[currPos1based - 1] = String.valueOf(nChar);
+                        uncertainCalls[currPos1based - 1] = String.valueOf(Character.toLowerCase(call_allele.getDisplayString().charAt(0)));
+                        missingDataPos[currPos1based - 1] = "t";
                     }
                 }
             } else {
                 unknownCall++;
 
-                calls[currPos1based - 1] = nChar;
-                uncertainCalls[currPos1based - 1] = nChar;
-                missingDataPos[currPos1based - 1] = true;
+                calls[currPos1based - 1] = String.valueOf(nChar);
+                uncertainCalls[currPos1based - 1] = String.valueOf(nChar);
+                missingDataPos[currPos1based - 1] = "t";
             }
         }
 
@@ -374,12 +374,12 @@ public class VCF2Genome {
         //Write draftRefMod
         tmpSeq = new StringBuffer();
 
-        char tmpchar;
+        String tmpchar;
 
 
         for (int pos = 1; pos <= calls.length; pos++){
             tmpchar = calls[pos - 1];
-            if (tmpchar == nChar) {
+            if (tmpchar.equals(String.valueOf(nChar))) {
                 tmpSeq.append(refGenome.charAt(pos - 1));
             } else {
                 tmpSeq.append(tmpchar);

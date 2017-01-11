@@ -106,9 +106,6 @@ public class VCF2GenomeTest {
 
         //Now compare output
 
-        File draft = new File("build/classes/test/draft.fasta");
-        File refmod = new File("build/classes/test/refMod.fasta");
-        File uncertain = new File("build/classes/main/uncertain.fasta");
 
         VCF2Genome vcf2Genome = new VCF2Genome(new String[]{"build/classes/test/VCF2Genome_Test_Subset.vcf", "build/classes/test/NC_021490.2.fasta", "build/classes/test/draft.fasta", "build/classes/test/refMod.fasta", "build/classes/test/uncertain.fasta", "30", "5", "0.9", "test"});
 
