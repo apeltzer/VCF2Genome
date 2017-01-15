@@ -20,8 +20,10 @@ public class VCF2GenomeTest {
     public VCF2GenomeTest(){}
 
 
-
-
+    /**
+     * This tests only the UG behaviour. We might need new testcases for the HaplotypeCaller behaviour as well then.
+     * @throws Exception
+     */
 
     @Test
     public void testVCF2GenomeForConsistency() throws Exception {

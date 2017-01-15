@@ -85,8 +85,39 @@ public class VCF2Genome {
     private boolean hadArguments = false;
 
     /**
-     * File Variables etc
+     * File Variables, Counter Variables
      */
+    private double minHomSNPallelFreq;
+    private double minHetSNPallelFreq;
+    private String refGenome;
+    private String[] calls;
+    private String[] uncertainCalls;
+    private Set<Integer> snpPositions;
+    private String[] missingDataPos;
+    private char nChar = 'N';
+    private char rChar = 'R';
+
+    private int covCount = 0;
+    private int allPos = 0;
+    private int noCallPos = 0;
+    private int nonStandardRefChars = 0;
+    private int refCallPos = 0;
+    private int varCallPos = 0;
+    private int discardedRefCall = 0;
+    private int discardedVarCall = 0;
+    private int filteredVarCall = 0;
+    private int unknownCall = 0;
+
+    int ns;
+    double nperc;
+    double covround;
+
+    double qual;
+    int cov;
+    double SNPallelFreq;
+
+    int lastPos1based = 0;
+    int currPos1based = 0;
 
 
     /**
@@ -113,6 +144,7 @@ public class VCF2Genome {
             return;
         } else {
             if(isVCF41()){
+                setupVariables();
                 runUGAnalysis();
             } else {
 
@@ -121,22 +153,22 @@ public class VCF2Genome {
 
     }
 
-    private void runUGAnalysis() throws Exception {
 
-        double minHomSNPallelFreq = minSNPalleleFreq;
-        double minHetSNPallelFreq = minSNPalleleFreq;
+    private void setupVariables() throws Exception {
+        minHomSNPallelFreq = minSNPalleleFreq;
+        minHetSNPallelFreq = minSNPalleleFreq;
 
 
         FASTAParser fastaparser = new FASTAParser(refFile);
-        String refGenome = fastaparser.getFastaFile().values().iterator().next();
+        refGenome = fastaparser.getFastaFile().values().iterator().next();
 
         //SNP array
-        String[] calls = new String[refGenome.length()];
-        String[] uncertainCalls = new String[refGenome.length()];
+        calls = new String[refGenome.length()];
+        uncertainCalls = new String[refGenome.length()];
 
-        Set<Integer> snpPositions = new HashSet<Integer>();
+        snpPositions = new HashSet<Integer>();
 
-        String[] missingDataPos = new String[refGenome.length()]; //TODO this is required
+        missingDataPos = new String[refGenome.length()]; //TODO this is required
 
 
         //Fill SNP array
@@ -154,46 +186,11 @@ public class VCF2Genome {
         System.out.println("SNP statistics\nQuality Threshold: " + minQual + "\nCoverage Threshold: " + minCov + "\nMinimum SNP allele frequency: " + minHomSNPallelFreq);
         System.out.println("sample\tSNP Calls\tcoverage(fold)\tcoverage(percent)\trefCall\tallPos\tnoCall\tdiscardedRefCall\tdiscardedVarCall\tfilteredVarCall\tunhandledGenotype");
 
-        char nChar = 'N';
-        char rChar = 'R';
-        //counter
-        int covCount = 0;
-        int allPos = 0;
-        int noCallPos = 0;
-        int nonStandardRefChars = 0;
-        int refCallPos = 0;
-        int varCallPos = 0;
-        int discardedRefCall = 0;
-        int discardedVarCall = 0;
-        int filteredVarCall = 0;
-        int unknownCall = 0;
-
-        int ns;
-        double nperc;
-        double covround;
-
-        double qual;
-        int cov;
-        double SNPallelFreq;
-
-        int lastPos1based = 0;
-        int currPos1based = 0;
 
 
-        //counter
-        covCount = 0;
-        allPos = 0;
-        noCallPos = 0;
-        nonStandardRefChars = 0;
-        refCallPos = 0;
-        varCallPos = 0;
-        discardedRefCall = 0;
-        discardedVarCall = 0;
-        filteredVarCall = 0;
-        unknownCall = 0;
+    }
 
-        lastPos1based = 0;
-        currPos1based = 0;
+    private void runUGAnalysis() throws Exception {
 
         VCFFileReader vcfFileReader = new VCFFileReader(new File(inFile), false);
         Iterator iter = vcfFileReader.iterator();
