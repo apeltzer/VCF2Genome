@@ -28,14 +28,24 @@ import java.util.Map;
  * @author Alexander Herbig
  */
 public class FASTAParser {
+    private Map<String, String> fastaFile;
+
+    public FASTAParser(String fileName) throws Exception {
+        fastaFile = parseDNA(fileName);
+    }
+
+    public Map<String, String> getFastaFile() {
+        return fastaFile;
+    }
+
     /**
+
      * Reads a multiple FASTA file containing DNA sequences in FASTA format.
      *
-     * @param br the BufferedReader which reads from the multiple FASTA file
      * @throws Exception
      * @return a list containing the resulting FASTAEntry objects
      */
-    public static Map<String, String> parseDNA(String filename) throws Exception {
+    private Map<String, String> parseDNA(String filename) throws Exception {
         BufferedReader br = new BufferedReader(new FileReader(filename));
 
         Map<String, String> fastaEntries = new HashMap<String, String>();
@@ -72,7 +82,7 @@ public class FASTAParser {
         return fastaEntries;
     }
 
-    private static String toID(String fastaID) {
+    private String toID(String fastaID) {
         return (fastaID.substring(1));
     }
 

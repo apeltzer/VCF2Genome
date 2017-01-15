@@ -22,14 +22,70 @@ import htsjdk.variant.variantcontext.Genotype;
 import htsjdk.variant.variantcontext.GenotypeType;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
+import org.kohsuke.args4j.*;
+import org.kohsuke.args4j.spi.BooleanOptionHandler;
+import org.kohsuke.args4j.spi.StringOptionHandler;
 
-import java.io.*;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.util.*;
 
 
 public class VCF2Genome {
+    /**
+     * Important program information
+     */
+
+    public static final String version = "0.91";
+    public static final String date = "2017-01-13";
+    public static final String programName = "VCF2Genome (v. "+ version + " " + date + ")";
+    public static final String author = "Alexander Herbig (<= v0.84) and Alexander Peltzer (>v0.84)";
+    public static final String authorsEmail = "herbig@shh.mpg.de, peltzer@shh.mpg.de";
+    public static final String programInfo = programName + "\nby " + author + "\n" + authorsEmail + "\n";
+
+
+    /**
+     * Option handling with args4j, to keep things clean in the code.
+     */
+
+    @Option(name="-in", handler= StringOptionHandler.class, required = true, usage="input VCF file")
+    private String inFile;
+
+    @Option(name="-ref", handler= StringOptionHandler.class, required = true, usage="reference genome in FastA format")
+    private String refFile;
+
+    @Option(name="-draft", handler= StringOptionHandler.class, required = true, usage="draft contains Ns where no call can be made. RefMod contains reference calls instead at these positions.")
+    private String outFileDraft;
+
+    @Option(name="-refMod", handler= StringOptionHandler.class, required = true, usage="More precise uncertainty encoding. N: Not covered or ambiguous. R: Low coverage but looks like Ref. a,c,t,g (lower case): Low coverage but looks like SNP.")
+    private String outFileRefMod;
+
+    @Option(name="-uncertain", handler= StringOptionHandler.class, required = true, usage="Special 1234 encoded FastA output.")
+    private  String outFileNR1234;
+
+    @Option(name="-minq", required = true, usage="Minimum quality score. For UG: Phred scaled quality score. For HC genome quality score.", metaVar="MIN_QUAL_SCORE")
+    private double minQual;
+
+    @Option(name="-minc", required = true, usage="Minimum coverage / reads confirming the call.", metaVar="MIN_COVERAGE_FOR_SNP")
+    private int minCov;
+
+    @Option(name="-minfreq", required = true, usage="Minimum fraction of reads supporting the called nucleotide.", metaVar="MIN_SNP_FREQUENCY")
+    private  double minSNPalleleFreq;
+
+    @Option(name="-draftname", required = true, usage="Name of the draft sequence.", metaVar="DRAFT_SEQ_NAME")
+    private  String draftName = "Test";
+
+    @Option(name="-h", usage="Display this help information and exit.", required=false, handler= BooleanOptionHandler.class)
+    private boolean help = false;
+
+    @Argument
+    private boolean hadArguments = false;
+
+    /**
+     * File Variables etc
+     */
 
 
     /**
@@ -43,56 +99,32 @@ public class VCF2Genome {
 
 
     /**
-     * @author Alexander Herbig
+     * @author Alexander Herbig & Alexander Peltzer
      */
     public VCF2Genome(String[] args) throws Exception {
-        String inFile;
-        String refFile;
-        String outFileDraft;
-        String outFileRefMod;
-        String outFileNR1234;
-        double minQual;
-        int minCov;
-        double minSNPalleleFreq;
-        String draftName = "new draft sequence";
+        //State basic program Information on CLI
+        System.out.println(programInfo);
 
+        //Parse our CLI part
+        doMain(args);
 
-        String programName = "VCF2Genome";
-        String author = "Alexander Herbig and Alexander Peltzer";
-        String authorsEmail = "herbig@shh.mpg.de, peltzer@shh.mpg.de";
-        String version = "0.9.1 (2017-01-09)";
-
-        System.out.println(programName + " - " + version + "\nby " + author + "\n");
-
-
-        if (args.length == 0 || args[0].equalsIgnoreCase("--help") || args[0].equalsIgnoreCase("-help") || args[0].equalsIgnoreCase("-?") || args[0].equalsIgnoreCase("-h")) {
-            System.out.println("--- How to use " + programName + " ---\n");
-            printUsage();
-            System.out.println("\nIn case of any questions contact " + author + " (" + authorsEmail + ").");
+        if(!hadArguments){
             return;
+        } else {
+            runAnalysis();
         }
 
-        //paras
-        inFile = args[0];
-        refFile = args[1];
-        outFileDraft = args[2];
-        outFileRefMod = args[3];
-        outFileNR1234 = args[4];
-        minQual = Double.parseDouble(args[5]);
-        minCov = Integer.parseInt(args[6]);
-        minSNPalleleFreq = Double.parseDouble(args[7]);
+    }
 
-        if (args.length >= 9) {
-            draftName = args[8];
-        }
+    private void runAnalysis() throws Exception {
 
         double minHomSNPallelFreq = minSNPalleleFreq;
         double minHetSNPallelFreq = minSNPalleleFreq;
 
 
-        String refGenome = FASTAParser.parseDNA(refFile).values().iterator().next();
+        FASTAParser fastaparser = new FASTAParser(refFile);
+        String refGenome = fastaparser.getFastaFile().values().iterator().next();
 
-        //TODO this is bad.... -> not possible once we have indels (!)
         //SNP array
         String[] calls = new String[refGenome.length()];
         String[] uncertainCalls = new String[refGenome.length()];
@@ -390,24 +422,35 @@ public class VCF2Genome {
 
     }
 
-    private static void printUsage() {
-        System.out.println("USAGE: java -jar VCF2Genome.jar <in.vcf> <reference-genome.fasta> <draft.fasta> <refMod.fasta> <uncertain.fasta> <minimum quality score> <minimum coverage> <minimum SNP allel frequency> [draft sequence name]");
-        System.out.println("EXAMPLE: java -jar VCF2Genome.jar in.vcf reference.fasta draft.fasta refMod.fasta uncertain.fasta 40 7 0.9 my_new_draft_genome");
-        System.out.println("");
-        System.out.println("VCF2Genome generates a draft genome sequence from a GATK vcf file. The file has to contain a call for each site (also non-variants).");
-        System.out.println("VCF2Genome is only applicable to single reference sequences. Multiple chromosomes are not supported.");
-        System.out.println("VCF2Genome is only recommended for bacterial genomes.");
-        System.out.println("Example GATK command line:");
-        System.out.println("GenomeAnalysisTK.jar -T UnifiedGenotyper -R <referenceGenome.fasta> --output_mode EMIT_ALL_SITES -o inputForVCF2Genome.vcf -I <input.bam>");
-        System.out.println("GATK needs bam files with read groups. Read groups can be added using PicardTools:");
-        System.out.println("AddOrReplaceReadGroups.jar I=In.bam O=Out.bam LB=NA PL=illumina PU=NA SM=NA VALIDATION_STRINGENCY=SILENT");
-        System.out.println("");
-        System.out.println("More details:");
-        System.out.println("draft vs. refMod: 'draft' contains 'N's where no call can be made, 'refMod' contains reference bases in this case.");
-        System.out.println("uncertain.fasta: More precise uncertainty encoding. N: Not covered or ambiguous. R: Low coverage but looks like Ref. a,c,t,g (lower case): Low coverage but looks like SNP.");
-        System.out.println("minimum quality score: The score is given in the 6th column of the vcf file. Phred-scaled quality score for the call. High QUAL scores indicate high confidence calls. -10log_10 p(no variant)");
-        System.out.println("minimum coverage: minimum number of reads confirming the call.");
-        System.out.println("minimum SNP allel frequency: minimum fraction of reads containing the called nucleotide.");
+    private void printUsage(PrintStream stream) {
+        stream.println("VCF2Genome generates a draft genome sequence from a GATK vcf file. The file has to contain a call for each site (also non-variants).");
+        stream.println("VCF2Genome is only applicable to single reference sequences. Multiple chromosomes are not supported. UnifiedGenotyper or HaplotypeCaller output is supported though.");
+    }
+
+    public void doMain(String[] args){
+        CmdLineParser parser = new CmdLineParser(this);
+        parser.setUsageWidth(120);
+
+        try {
+            parser.parseArgument(args);
+            this.hadArguments = true;
+
+            if(parser.getArguments().isEmpty()){
+                throw new CmdLineException(parser, "No argument is provided unfortunately.");
+            }
+        } catch (CmdLineException e) {
+            System.err.println(e.getMessage());
+            parser.printUsage(System.err);
+            System.err.println();
+            System.err.println("    Example: java -jar VCF2Genome.jar"+parser.printExample(OptionHandlerFilter.REQUIRED));
+            return;
+        }
+
+        if(help){
+            printUsage(System.err);
+            parser.printUsage(System.err);
+            return;
+        }
     }
 
 

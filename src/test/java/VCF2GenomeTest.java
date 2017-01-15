@@ -24,10 +24,8 @@ public class VCF2GenomeTest {
 
     @Test
     public void testVCF2GenomeForConsistency() throws Exception {
-        //<in.vcf> <reference-genome.fasta> <draft.fasta> <refMod.fasta> <uncertain.fasta> <minimum quality score> <minimum coverage> <minimum SNP allel frequency> [draft sequence name]");
-        //Main.main();
 
-        VCF2Genome vcf2Genome = new VCF2Genome(new String[]{"build/classes/test/VCF2Genome_Test_Subset.vcf", "build/classes/test/NC_021490.2.fasta", "build/classes/test/draft.fasta", "build/classes/test/refMod.fasta", "build/classes/test/uncertain.fasta", "30", "5", "0.9", "test"});
+        VCF2Genome vcf2Genome = new VCF2Genome(new String[]{"-in", "build/classes/test/VCF2Genome_Test_Subset.vcf", "-ref", "build/classes/test/NC_021490.2.fasta", "-draft", "build/classes/test/draft.fasta", "-refMod", "build/classes/test/refMod.fasta", "-uncertain", "build/classes/test/uncertain.fasta", "-minq", "30", "-minc", "5", "-minfreq", "0.9", "-draftname", "test"});
 
 
         //Now compare output
@@ -50,7 +48,7 @@ public class VCF2GenomeTest {
 
     @Test(expected = IOException.class)
     public void testVCF2GenomeFailMessage() throws Exception{
-        VCF2Genome vcf2Genome = new VCF2Genome(new String[]{"build/classes/test/VCF2Genome_Test_SubsetFailSortOrder.vcf", "build/classes/test/NC_021490.2.fasta", "build/classes/test/draft_fail.fasta", "build/classes/test/refMod_fail.fasta", "build/classes/test/uncertain_fail.fasta", "30", "5", "0.9", "test"});
+        VCF2Genome vcf2Genome = new VCF2Genome(new String[]{"-in", "build/classes/test/VCF2Genome_Test_SubsetFailSortOrder.vcf", "-ref", "build/classes/test/NC_021490.2.fasta", "-draft", "build/classes/test/draft_fail.fasta", "-refMod", "build/classes/test/refMod_fail.fasta", "-uncertain", "build/classes/test/uncertain_fail.fasta", "-minq", "30", "-minc", "5", "-minfreq", "0.9", "-draftname", "test"});
     }
 
 
@@ -69,30 +67,7 @@ public class VCF2GenomeTest {
     @Test
     public void testHelpAndStuff() throws Exception {
         VCF2Genome vcf2Genome = new VCF2Genome(new String[]{"-h"});
-        assertEquals("VCF2Genome - 0.9.1 (2017-01-09)\n" +
-                "by Alexander Herbig and Alexander Peltzer\n" +
-                "\n" +
-                "--- How to use VCF2Genome ---\n" +
-                "\n" +
-                "USAGE: java -jar VCF2Genome.jar <in.vcf> <reference-genome.fasta> <draft.fasta> <refMod.fasta> <uncertain.fasta> <minimum quality score> <minimum coverage> <minimum SNP allel frequency> [draft sequence name]\n" +
-                "EXAMPLE: java -jar VCF2Genome.jar in.vcf reference.fasta draft.fasta refMod.fasta uncertain.fasta 40 7 0.9 my_new_draft_genome\n" +
-                "\n" +
-                "VCF2Genome generates a draft genome sequence from a GATK vcf file. The file has to contain a call for each site (also non-variants).\n" +
-                "VCF2Genome is only applicable to single reference sequences. Multiple chromosomes are not supported.\n" +
-                "VCF2Genome is only recommended for bacterial genomes.\n" +
-                "Example GATK command line:\n" +
-                "GenomeAnalysisTK.jar -T UnifiedGenotyper -R <referenceGenome.fasta> --output_mode EMIT_ALL_SITES -o inputForVCF2Genome.vcf -I <input.bam>\n" +
-                "GATK needs bam files with read groups. Read groups can be added using PicardTools:\n" +
-                "AddOrReplaceReadGroups.jar I=In.bam O=Out.bam LB=NA PL=illumina PU=NA SM=NA VALIDATION_STRINGENCY=SILENT\n" +
-                "\n" +
-                "More details:\n" +
-                "draft vs. refMod: 'draft' contains 'N's where no call can be made, 'refMod' contains reference bases in this case.\n" +
-                "uncertain.fasta: More precise uncertainty encoding. N: Not covered or ambiguous. R: Low coverage but looks like Ref. a,c,t,g (lower case): Low coverage but looks like SNP.\n" +
-                "minimum quality score: The score is given in the 6th column of the vcf file. Phred-scaled quality score for the call. High QUAL scores indicate high confidence calls. -10log_10 p(no variant)\n" +
-                "minimum coverage: minimum number of reads confirming the call.\n" +
-                "minimum SNP allel frequency: minimum fraction of reads containing the called nucleotide.\n" +
-                "\n" +
-                "In case of any questions contact Alexander Herbig and Alexander Peltzer (herbig@shh.mpg.de, peltzer@shh.mpg.de).\n" , outContent.toString());
+        assertEquals("VCF2Genome (v. 0.91 2017-01-13)\nby Alexander Herbig (<= v0.84) and Alexander Peltzer (>v0.84)\nherbig@shh.mpg.de, peltzer@shh.mpg.de\n\n", outContent.toString());
     }
 
     @Test
@@ -107,7 +82,7 @@ public class VCF2GenomeTest {
         //Now compare output
 
 
-        VCF2Genome vcf2Genome = new VCF2Genome(new String[]{"build/classes/test/VCF2Genome_Test_Subset.vcf", "build/classes/test/NC_021490.2.fasta", "build/classes/test/draft.fasta", "build/classes/test/refMod.fasta", "build/classes/test/uncertain.fasta", "30", "5", "0.9", "test"});
+        VCF2Genome vcf2Genome = new VCF2Genome(new String[]{"-in", "build/classes/test/VCF2Genome_Test_Subset.vcf", "-ref", "build/classes/test/NC_021490.2.fasta", "-draft", "build/classes/test/draft.fasta", "-refMod", "build/classes/test/refMod.fasta", "-uncertain", "build/classes/test/uncertain.fasta", "-minq", "30", "-minc", "5", "-minfreq", "0.9", "-draftname", "test"});
 
 
         assertEquals(c1, vcf2Genome.getAmbiguousBase(c1,c1));

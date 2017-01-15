@@ -1,5 +1,5 @@
 group 'com.uni-tuebingen.de.it.eager.vcf2genome'
-version '0.90'
+version '0.91'
 
 apply plugin: 'maven'
 apply plugin: 'maven-publish'
@@ -35,6 +35,7 @@ dependencies {
     compile 'com.github.samtools:htsjdk:2.+'
     compile 'com.google.guava:guava:+'
     compile 'commons-io:commons-io:2.4'
+    compile 'args4j:args4j:2.33'
     compile 'junit:junit:4.12'
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }
