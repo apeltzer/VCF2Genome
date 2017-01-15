@@ -1,3 +1,4 @@
+import FastAIO.FASTAParser;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -68,6 +69,13 @@ public class VCF2GenomeTest {
     public void testHelpAndStuff() throws Exception {
         VCF2Genome vcf2Genome = new VCF2Genome(new String[]{"-h"});
         assertEquals("VCF2Genome (v. 0.91 2017-01-13)\nby Alexander Herbig (<= v0.84) and Alexander Peltzer (>v0.84)\nherbig@shh.mpg.de, peltzer@shh.mpg.de\n\n", outContent.toString());
+    }
+
+    @Test
+    public void testFastaReader() throws Exception {
+        FASTAParser fastaParser = new FASTAParser("build/classes/test/mFasta.fasta");
+        assertEquals(2, fastaParser.getFastaFile().size());
+
     }
 
     @Test
