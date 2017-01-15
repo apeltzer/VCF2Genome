@@ -77,21 +77,16 @@ public class VCF2GenomeTest {
         char c3 = 'T';
         char c4 = 'C';
 
+        AmbigoutyCalculator ambigoutyCalculator = new AmbigoutyCalculator();
 
 
-        //Now compare output
-
-
-        VCF2Genome vcf2Genome = new VCF2Genome(new String[]{"-in", "build/classes/test/VCF2Genome_Test_Subset.vcf", "-ref", "build/classes/test/NC_021490.2.fasta", "-draft", "build/classes/test/draft.fasta", "-refMod", "build/classes/test/refMod.fasta", "-uncertain", "build/classes/test/uncertain.fasta", "-minq", "30", "-minc", "5", "-minfreq", "0.9", "-draftname", "test"});
-
-
-        assertEquals(c1, vcf2Genome.getAmbiguousBase(c1,c1));
-        assertEquals('R', vcf2Genome.getAmbiguousBase(c1,c2));
-        assertEquals('Y', vcf2Genome.getAmbiguousBase(c3,c4));
-        assertEquals('K', vcf2Genome.getAmbiguousBase(c1,c3));
-        assertEquals('M', vcf2Genome.getAmbiguousBase(c2,c4));
-        assertEquals('S', vcf2Genome.getAmbiguousBase(c1,c4));
-        assertEquals('W', vcf2Genome.getAmbiguousBase(c2,c3));
-        assertEquals('N', vcf2Genome.getAmbiguousBase('U', c1)); //One example!
+        assertEquals(c1, ambigoutyCalculator.getAmbiguousBase(c1,c1));
+        assertEquals('R', ambigoutyCalculator.getAmbiguousBase(c1,c2));
+        assertEquals('Y', ambigoutyCalculator.getAmbiguousBase(c3,c4));
+        assertEquals('K', ambigoutyCalculator.getAmbiguousBase(c1,c3));
+        assertEquals('M', ambigoutyCalculator.getAmbiguousBase(c2,c4));
+        assertEquals('S', ambigoutyCalculator.getAmbiguousBase(c1,c4));
+        assertEquals('W', ambigoutyCalculator.getAmbiguousBase(c2,c3));
+        assertEquals('N', ambigoutyCalculator.getAmbiguousBase('U', c1)); //One example!
     }
 }

@@ -22,6 +22,7 @@ import htsjdk.variant.variantcontext.Genotype;
 import htsjdk.variant.variantcontext.GenotypeType;
 import htsjdk.variant.variantcontext.VariantContext;
 import htsjdk.variant.vcf.VCFFileReader;
+import htsjdk.variant.vcf.VCFHeaderLine;
 import org.kohsuke.args4j.*;
 import org.kohsuke.args4j.spi.BooleanOptionHandler;
 import org.kohsuke.args4j.spi.StringOptionHandler;
@@ -111,12 +112,16 @@ public class VCF2Genome {
         if(!hadArguments){
             return;
         } else {
-            runAnalysis();
+            if(isVCF41()){
+                runUGAnalysis();
+            } else {
+
+            }
         }
 
     }
 
-    private void runAnalysis() throws Exception {
+    private void runUGAnalysis() throws Exception {
 
         double minHomSNPallelFreq = minSNPalleleFreq;
         double minHetSNPallelFreq = minSNPalleleFreq;
@@ -327,8 +332,9 @@ public class VCF2Genome {
 
                     varCallPos++;
 
-                    calls[currPos1based - 1] = String.valueOf(getAmbiguousBase(calls[currPos1based - 1].charAt(0), call_allele.getDisplayString().charAt(0)));
-                    uncertainCalls[currPos1based - 1] = String.valueOf(getAmbiguousBase(calls[currPos1based - 1].charAt(0), call_allele.getDisplayString().charAt(0)));
+                    AmbigoutyCalculator ambigoutyCalculator = new AmbigoutyCalculator();
+                    calls[currPos1based - 1] = String.valueOf(ambigoutyCalculator.getAmbiguousBase(calls[currPos1based - 1].charAt(0), call_allele.getDisplayString().charAt(0)));
+                    uncertainCalls[currPos1based - 1] = String.valueOf(ambigoutyCalculator.getAmbiguousBase(calls[currPos1based - 1].charAt(0), call_allele.getDisplayString().charAt(0)));
 
                     snpPositions.add(currPos1based);
 
@@ -374,9 +380,94 @@ public class VCF2Genome {
         System.out.println(getSampleNameFromPath(inFile) + "\t" + varCallPos + "\t" + covround + "\t" + (100 - nperc) + "\t" + refCallPos + "\t" + allPos + "\t" + noCallPos + "\t" + discardedRefCall + "\t" + discardedVarCall + "\t" + filteredVarCall + "\t" + unknownCall);
 
 
-        //////////////////////
-        //END -- Parse VCFs //
-        //////////////////////
+        /**
+         * Now just write the output into the separate files
+         */
+
+        createOutputFiles(calls, outFileDraft, draftName,uncertainCalls,nChar,refGenome);
+
+
+
+
+
+    }
+
+    private void printUsage(PrintStream stream) {
+        stream.println("VCF2Genome generates a draft genome sequence from a GATK vcf file. The file has to contain a call for each site (also non-variants).");
+        stream.println("VCF2Genome is only applicable to single reference sequences. Multiple chromosomes are not supported. UnifiedGenotyper or HaplotypeCaller output is supported though.");
+    }
+
+    public void doMain(String[] args){
+        CmdLineParser parser = new CmdLineParser(this);
+        parser.setUsageWidth(120);
+
+        try {
+            parser.parseArgument(args);
+            this.hadArguments = true;
+
+            if(parser.getArguments().isEmpty()){
+                throw new CmdLineException(parser, "No argument is provided unfortunately.");
+            }
+        } catch (CmdLineException e) {
+            System.err.println(e.getMessage());
+            parser.printUsage(System.err);
+            System.err.println();
+            System.err.println("    Example: java -jar VCF2Genome.jar"+parser.printExample(OptionHandlerFilter.REQUIRED));
+            return;
+        }
+
+        if(help){
+            printUsage(System.err);
+            parser.printUsage(System.err);
+            return;
+        }
+    }
+
+
+
+
+    /**
+     * This gets the sample name without the extension from the path.
+     * @param sampleNameWithPath
+     * @return
+     */
+
+    public static String getSampleNameFromPath(String sampleNameWithPath) {
+        return Files.getNameWithoutExtension(sampleNameWithPath);
+    }
+
+
+    /**
+     * This method checks whether we have VCF v4.1 and therefore output from UnifiedGenotyper or HaplotypeCaller output here...
+     * This is required to handle the input/output differently and keep the methods working for both cases and downstream  compatibility reasons.
+     *
+     */
+
+    private boolean isVCF41(){
+        boolean tmp = false;
+        VCFFileReader vcfFileReader = new VCFFileReader(new File(inFile), false);
+        Collection<VCFHeaderLine> headerLines = vcfFileReader.getFileHeader().getOtherHeaderLines();
+
+        for(VCFHeaderLine line : headerLines){
+            if(line.getValue().contains("UnifiedGenotyper")){
+                tmp = true;
+            }
+        }
+        return tmp;
+    }
+
+
+    /**
+     * This is the generic output writing method for both UG and HC output.
+     * @param calls
+     * @param outFileDraft
+     * @param draftName
+     * @param uncertainCalls
+     * @param nChar
+     * @param refGenome
+     * @throws Exception
+     */
+    private void createOutputFiles(String[] calls, String outFileDraft, String draftName, String[] uncertainCalls, char nChar, String refGenome) throws Exception{
 
 
         //Write draftN
@@ -419,75 +510,6 @@ public class VCF2Genome {
         }
 
         fw = new FASTAWriter(outFileRefMod, draftName + "_draftRefMod", tmpSeq.toString());
-
-    }
-
-    private void printUsage(PrintStream stream) {
-        stream.println("VCF2Genome generates a draft genome sequence from a GATK vcf file. The file has to contain a call for each site (also non-variants).");
-        stream.println("VCF2Genome is only applicable to single reference sequences. Multiple chromosomes are not supported. UnifiedGenotyper or HaplotypeCaller output is supported though.");
-    }
-
-    public void doMain(String[] args){
-        CmdLineParser parser = new CmdLineParser(this);
-        parser.setUsageWidth(120);
-
-        try {
-            parser.parseArgument(args);
-            this.hadArguments = true;
-
-            if(parser.getArguments().isEmpty()){
-                throw new CmdLineException(parser, "No argument is provided unfortunately.");
-            }
-        } catch (CmdLineException e) {
-            System.err.println(e.getMessage());
-            parser.printUsage(System.err);
-            System.err.println();
-            System.err.println("    Example: java -jar VCF2Genome.jar"+parser.printExample(OptionHandlerFilter.REQUIRED));
-            return;
-        }
-
-        if(help){
-            printUsage(System.err);
-            parser.printUsage(System.err);
-            return;
-        }
-    }
-
-
-    public char getAmbiguousBase(char c1, char c2) {
-        Set<Character> chars = new HashSet<Character>();
-        chars.add(c1);
-        chars.add(c2);
-
-        if (c1 == c2)
-            return c1;
-
-        if (chars.contains('G') && chars.contains('A'))
-            return 'R';
-        if (chars.contains('T') && chars.contains('C'))
-            return 'Y';
-        if (chars.contains('G') && chars.contains('T'))
-            return 'K';
-        if (chars.contains('A') && chars.contains('C'))
-            return 'M';
-        if (chars.contains('G') && chars.contains('C'))
-            return 'S';
-        if (chars.contains('A') && chars.contains('T'))
-            return 'W';
-
-        System.err.println("Illegal arguments in function getAmbiguousBase: " + c1 + ", " + c2);
-
-        return 'N';
-    }
-
-    /**
-     * This gets the sample name without the extension from the path.
-     * @param sampleNameWithPath
-     * @return
-     */
-
-    public static String getSampleNameFromPath(String sampleNameWithPath) {
-        return Files.getNameWithoutExtension(sampleNameWithPath);
     }
 
 
