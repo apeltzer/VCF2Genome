@@ -16,6 +16,7 @@
 
 import FastAIO.FASTAParser;
 import FastAIO.FASTAWriter;
+import VCFTools.AmbigoutyCalculator;
 import com.google.common.io.Files;
 import htsjdk.variant.variantcontext.Allele;
 import htsjdk.variant.variantcontext.Genotype;
@@ -31,7 +32,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
 
 public class VCF2Genome {
@@ -147,13 +151,19 @@ public class VCF2Genome {
                 setupVariables();
                 runUGAnalysis();
             } else {
-
+                setupVariables();
+                runHCAnalysis();
             }
         }
 
     }
 
 
+    /**
+     * Method to set up required variables properly.
+     *
+     * @throws Exception
+     */
     private void setupVariables() throws Exception {
         minHomSNPallelFreq = minSNPalleleFreq;
         minHetSNPallelFreq = minSNPalleleFreq;
@@ -190,6 +200,76 @@ public class VCF2Genome {
 
     }
 
+
+
+
+    private void non_cov_or_gvcf_handler(VariantContext variantContext) throws IOException {
+        if (isgVCFFile()) { //TODO Handle GVCF content here!!
+            int start = variantContext.getStart();
+            int end = variantContext.getEnd();
+            if (start != end) {
+                for (int i = start; i < end; i++) { //exclusive end, no need to change the arrays here (ref calls are already in both arrays by default!), just counter required to be updated!)
+                    allPos++;
+                    refCallPos++;
+                    missingDataPos[i] = "f";
+                }
+            } else {
+                allPos++;
+                refCallPos++;
+                missingDataPos[start] = "f";
+            }
+        } else if (currPos1based - lastPos1based != 1) {
+            if (lastPos1based >= currPos1based) {
+                throw new IOException("Error: Base calls in the vcf file are not sorted! (Note that we currently don't support multiple chromosomes, too!");
+            } else {
+                for (int i = lastPos1based + 1; i < currPos1based; i++) {
+                    allPos++;
+                    nonStandardRefChars++;
+
+                    calls[currPos1based - 1] = String.valueOf(nChar);
+                    uncertainCalls[currPos1based - 1] = String.valueOf(nChar);
+                    missingDataPos[currPos1based - 1] = "t";
+                }
+            }
+        }
+    }
+
+
+    /**
+     * Method to properly handle input from HaplotypeCaller including INDELs etc...
+     *
+     * @throws Exception
+     */
+
+    private void runHCAnalysis() throws Exception {
+        // Variable for offset, for insertion offset = + X bases, deletion -X bases as notation
+        int offset = 0;
+        boolean isgVCF = isgVCFFile();
+
+        VCFFileReader vcfFileReader = new VCFFileReader(new File(inFile), false);
+        Iterator iter = vcfFileReader.iterator();
+        while(iter.hasNext()){
+            allPos++;
+            VariantContext variantContext = (VariantContext) iter.next();
+            lastPos1based = currPos1based;
+
+            //Check for Ns in the context
+            non_cov_or_gvcf_handler(variantContext);
+
+
+        }
+
+
+
+    }
+
+
+    /**
+     * Runs the Unified Genotyper analysis.
+     *
+     * @throws Exception
+     */
+
     private void runUGAnalysis() throws Exception {
 
         VCFFileReader vcfFileReader = new VCFFileReader(new File(inFile), false);
@@ -204,48 +284,34 @@ public class VCF2Genome {
             currPos1based = variantContext.getStart();
 
             //Introduce Ns for non-covered sites
-            if (currPos1based - lastPos1based != 1) {
-                if (lastPos1based >= currPos1based) {
-                    throw new IOException("Error: Base calls in the vcf file are not sorted! (Note that we currently don't support multiple chromosomes, too!");
-                }
-
-                for (int i = lastPos1based + 1; i < currPos1based; i++) {
-                    allPos++;
-                    nonStandardRefChars++;
-
-                    calls[currPos1based - 1] = String.valueOf(nChar);
-                    uncertainCalls[currPos1based - 1] = String.valueOf(nChar);
-                    missingDataPos[currPos1based - 1] = "t";
-                }
-            }
-
+            non_cov_or_gvcf_handler(variantContext);
 
             //Check what we have here!!!
 
             boolean isNoCall = false;
             boolean isRefCall = false;
-            boolean isVarCall = false;
+            boolean isVarHetCall = false;
             boolean isVarHomCall = false;
             boolean isUnhandledCall = false;
+
 
             // HET HOM_REF HOM_VAR MIXED NO_CALL UNAVAILABLE
 
             for (Genotype g : variantContext.getGenotypes()) {
-                variantContext.getAttribute("AD");
                 GenotypeType gtt = g.getType();
-                if (gtt == GenotypeType.NO_CALL) { //TODO check with test cases here!!!
+                if (gtt == GenotypeType.NO_CALL) {
                     isNoCall = true;
                 }
-                if (gtt == GenotypeType.HOM_REF) { //TODO check with test  cases here!!!
+                if (gtt == GenotypeType.HOM_REF) {
                     isRefCall = true;
                 }
-                if (gtt == GenotypeType.HET) { //TODO check with test cases here, too!
-                    isVarCall = true;
+                if (gtt == GenotypeType.HET) {
+                    isVarHetCall = true;
                 }
                 if (gtt == GenotypeType.HOM_VAR) {
-                    isVarHomCall = true; //TODO check with 1/1 string for example!!!
+                    isVarHomCall = true;
                 }
-                if(variantContext.getAlleles().size() > 2){ //We currently handle haploid calls only!
+                if(variantContext.getAlleles().size() > 2){ //only handling max haploid calls in UG here...
                     isUnhandledCall = true;
                 }
             }
@@ -270,7 +336,6 @@ public class VCF2Genome {
 
                 Genotype g = variantContext.getGenotype(0);
                 cov = g.getDP();
-                //cov = Integer.parseInt((String) variantContext.getAttribute("DP")); //This can be wrong!! (109 vs 4!)
 
                 covCount += cov;
 
@@ -290,10 +355,9 @@ public class VCF2Genome {
 
 
             //VariantCall
-            //TODO what to do with something like 1/2 - cant handle this with this kind of code right now!
-            else if ((isVarCall | isVarHomCall) & !isUnhandledCall)  {
+            else if ((isVarHetCall | isVarHomCall) & !isUnhandledCall)  {
                 qual = variantContext.getPhredScaledQual();
-                //ned to get the second allele here, non ref
+                //need to get the second allele here, non ref
                 Allele ref_allele = variantContext.getReference();
                 Allele call_allele = variantContext.getAlternateAlleles().get(0);
 
@@ -377,8 +441,8 @@ public class VCF2Genome {
         System.out.println(getSampleNameFromPath(inFile) + "\t" + varCallPos + "\t" + covround + "\t" + (100 - nperc) + "\t" + refCallPos + "\t" + allPos + "\t" + noCallPos + "\t" + discardedRefCall + "\t" + discardedVarCall + "\t" + filteredVarCall + "\t" + unknownCall);
 
 
-        /**
-         * Now just write the output into the separate files
+        /*
+          Now just write the output into the separate files
          */
 
         createOutputFiles(calls, outFileDraft, draftName,uncertainCalls,nChar,refGenome);
@@ -394,29 +458,27 @@ public class VCF2Genome {
         stream.println("VCF2Genome is only applicable to single reference sequences. Multiple chromosomes are not supported. UnifiedGenotyper or HaplotypeCaller output is supported though.");
     }
 
-    public void doMain(String[] args){
+    private void doMain(String[] args){
         CmdLineParser parser = new CmdLineParser(this);
-        parser.setUsageWidth(120);
+        parser.getProperties().withUsageWidth(120);
 
         try {
             parser.parseArgument(args);
             this.hadArguments = true;
 
             if(parser.getArguments().isEmpty()){
-                throw new CmdLineException(parser, "No argument is provided unfortunately.");
+                throw new CmdLineException(parser, "No argument is provided unfortunately.", new Throwable());
             }
         } catch (CmdLineException e) {
             System.err.println(e.getMessage());
             parser.printUsage(System.err);
             System.err.println();
             System.err.println("    Example: java -jar VCF2Genome.jar"+parser.printExample(OptionHandlerFilter.REQUIRED));
-            return;
         }
 
         if(help){
             printUsage(System.err);
             parser.printUsage(System.err);
-            return;
         }
     }
 
@@ -425,11 +487,11 @@ public class VCF2Genome {
 
     /**
      * This gets the sample name without the extension from the path.
-     * @param sampleNameWithPath
-     * @return
+     * @param sampleNameWithPath Full path to input VCF file is used as input.
+     * @return Returns the sample Name without the path to the file.
      */
 
-    public static String getSampleNameFromPath(String sampleNameWithPath) {
+    private String getSampleNameFromPath(String sampleNameWithPath) {
         return Files.getNameWithoutExtension(sampleNameWithPath);
     }
 
@@ -453,16 +515,31 @@ public class VCF2Genome {
         return tmp;
     }
 
+    /**
+     * Method to figure out whether we have a gVCF with interval information or a BP_Resolution output file...
+     */
+
+    private boolean isgVCFFile(){
+        boolean tmp = false;
+        VCFFileReader vcfFileReader = new VCFFileReader(new File(inFile), false);
+        VCFHeaderLine headerline = vcfFileReader.getFileHeader().getMetaDataLine("GVCFBlock0-1");
+        if(headerline != null){
+            tmp = true;
+        }
+
+        return tmp;
+    }
+
 
     /**
      * This is the generic output writing method for both UG and HC output.
-     * @param calls
-     * @param outFileDraft
-     * @param draftName
-     * @param uncertainCalls
-     * @param nChar
-     * @param refGenome
-     * @throws Exception
+     * @param calls the calls string array
+     * @param outFileDraft the outfile name for the draft sequence
+     * @param draftName the draft Name = fasta-id for entry
+     * @param uncertainCalls the uncertainty encoded calls string array
+     * @param nChar the character for undefined / no call entries
+     * @param refGenome the full string of the reference genome
+     * @throws Exception can fail
      */
     private void createOutputFiles(String[] calls, String outFileDraft, String draftName, String[] uncertainCalls, char nChar, String refGenome) throws Exception{
 
@@ -478,6 +555,7 @@ public class VCF2Genome {
         }
 
         FASTAWriter fw = new FASTAWriter(outFileDraft, draftName + "_draftN", tmpSeq.toString());
+
 
 
 
