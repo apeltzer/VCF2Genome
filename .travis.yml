@@ -9,7 +9,7 @@ deploy:
   provider: releases
   api_key:
     secure: cgTrdcDsrr2ld1yE1yxy45QilzJRyy3imGVPZ3To9GltxerQy32ovfveqP+eTR6GqbE9Y4zRiHQYL43OcKQDuyopLtUZ1QeaFdZUuAK7PnyPEVpGRC95PmDwg60/Wz5dGi1cYjJm+jpegzvVK/sD4hBMUvnZCMflotbcrY1o1fV80DavYEjC1cnyNXX5aOOnu0KpP0rY6AfGfkUbj4RruBtFZPqayd//QlTiR9/JIGOKTWiHU6/10VBx6Eh+g4mhvTewKWdSHQX2IF2cE8kXyYGNRFYgUIPDpjUCDVzu4XPfofvXoDvcPPn7LX/aaouCgpW2yrBTZ+wnni5O4NfYZXTplZjGC03K2/0o8eUR9D7nsSvT9G5tnbFAQlNHRIsz+wK95fRMQIw+XgcSwX5ezt0/7CEy60KV6gzfSGpbz23KKQtLUHOmeYmjambofrGzcOxtGL2NdQ3+cT7y1u3FottkQBF68hKKMZDH00HlKD9tlq75ZNgqoE0+1a70yxNwwr84I8TeNcZiFm/5CnpGQ6UGm5EvPnQyMI0Ufm51g+6d/XI6Mv2IHS71Uuif9S0DCE72W5H1nB7ijclJrEwiikJWqapoMd3xsIRakikEREQlx5Nzik6Hngcd2/imCSbu7laXZYheLih7k8bJaubeVJKvLT1JvkArPfJQa/Bh2ow=
- file: build/libs/VCF2Genome-0.91.jar
+  file: build/libs/VCF2Genome-0.91.jar
   skip_cleanup: true
   all_branches: true 
   on:
