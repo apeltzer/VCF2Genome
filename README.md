@@ -8,4 +8,4 @@ Download via [GitHub Releases](https://github.com/apeltzer/VCF2Genome/releases) 
 
 Author: Alexander Herbig <herbig@shh.mpg.de> (v0.84), Alexander Peltzer (v0.90+).
 
-Contact Alexander Peltzer <alexander.peltzer@uni-tuebingen.de> for questions regarding the tool or write him on GitHub/open a ticket.
+Contact Alexander Peltzer for questions regarding the tool or via GitHub and/or open a ticket here.
