@@ -76,3 +76,15 @@ N: Not covered or ambiguous. R: Low coverage but looks like Reference call. a,c,
 ### `-uncertain`
 
 Path to uncertainty encoded output file in a special 1234 format for some downstream tools. 
+
+## Additional comments
+
+### VCF Compatibility
+
+Note that this tool was written a couple of years ago for reconstructing genomes from GATK UnifiedGenotyper VCF output files. It may work with other genotypers providing the same kind of VCF4.0/VCF4.1 format, but might not work well with data originating for example from GATK HaplotypeCaller. The tool requires an [`EMIT_ALL_SITES`](https://software.broadinstitute.org/gatk/documentation/tooldocs/3.8-0/org_broadinstitute_gatk_tools_walkers_genotyper_UnifiedGenotyper.php) compatible VCF input file.
+
+### SNP/Indel handling
+
+This tool is currently unable to handle indels properly due to the index handling procedure in the software itself. SNPs are fine.
+
+### 
