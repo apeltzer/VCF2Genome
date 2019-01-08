@@ -3,12 +3,13 @@ A tool to create a draft genome file out of a GATK VCF file
 
 [![Build Status](https://travis-ci.org/apeltzer/VCF2Genome.svg?branch=master)](https://travis-ci.org/apeltzer/VCF2Genome)
 [![codecov](https://codecov.io/gh/apeltzer/VCF2Genome/branch/master/graph/badge.svg)](https://codecov.io/gh/apeltzer/VCF2Genome)
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat-square)](http://bioconda.github.io/recipes/vcf2genome/README.html)
 
-Download via [GitHub Releases](https://github.com/apeltzer/VCF2Genome/releases) or via Bioconda (later).
+Download via [GitHub Releases](https://github.com/apeltzer/VCF2Genome/releases) or via [Bioconda](https://bioconda.github.io/recipes/vcf2genome/README.html).
 
 Author: Alexander Herbig <herbig@shh.mpg.de> (v0.84), Alexander Peltzer (v0.90+).
 
-Contact Alexander Peltzer for questions regarding the tool or via GitHub and/or open a ticket here.
+Contact Alexander Peltzer<peltzer@shh.mpg.de> for questions regarding the tool or via GitHub and/or open a ticket here.
 
 
 # Basic Usage description
